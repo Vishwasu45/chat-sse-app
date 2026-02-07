@@ -5,19 +5,29 @@ import { parseMarkdown } from '../utils/markdownParser';
 
 /**
  * Message component - Displays a single chat message
- * Props:
- * - text: The message text content
- * - isUser: Boolean indicating if message is from user or bot
- * - isStreaming: Boolean indicating if the message is currently being streamed
+ * Supports user and assistant messages with markdown rendering
  */
-const Message = ({ text, isUser, isStreaming }) => {
+const Message = ({ text, isUser, isStreaming, isError }) => {
   return (
-    <div className={`message ${isUser ? 'user-message' : 'bot-message'} ${isStreaming ? 'streaming' : ''}`}>
-      {isUser ? (
-        <span>{text}</span>
-      ) : (
-        <div dangerouslySetInnerHTML={{ __html: parseMarkdown(text) }} />
-      )}
+    <div className={`message-wrapper ${isStreaming ? 'streaming' : ''}`}>
+      <div className={`message ${isUser ? 'user-message' : 'assistant-message'}`}>
+        <div className="message-avatar">
+          {isUser ? 'U' : 'AI'}
+        </div>
+        <div className="message-content">
+          <div className="message-role">
+            {isUser ? 'You' : 'Assistant'}
+          </div>
+          <div 
+            className={`message-text ${isError ? 'error' : ''}`}
+            dangerouslySetInnerHTML={{ 
+              __html: text ? parseMarkdown(text) : (
+                isStreaming ? '<div class="typing-indicator"><span></span><span></span><span></span></div>' : ''
+              )
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -25,12 +35,13 @@ const Message = ({ text, isUser, isStreaming }) => {
 Message.propTypes = {
   text: PropTypes.string.isRequired,
   isUser: PropTypes.bool.isRequired,
-  isStreaming: PropTypes.bool
+  isStreaming: PropTypes.bool,
+  isError: PropTypes.bool
 };
 
 Message.defaultProps = {
-  isStreaming: false
+  isStreaming: false,
+  isError: false
 };
 
 export default Message;
-
